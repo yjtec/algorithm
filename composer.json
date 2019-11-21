@@ -1,0 +1,31 @@
+{
+    "name": "yjtec/algorithm",
+    "description": "各种算法的PHP写法",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "yjtec/linphe": "*",
+        "yjtec/linview": "*"
+    },
+    "authors": [
+        {
+            "name": "Ax",
+            "email": "18716463@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "app\\": "app/",
+            "cfg\\": "cfg/",
+            "boot\\": "boot/",
+            "lib\\": "lib/"
+        }
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
+        }
+    }
+}
