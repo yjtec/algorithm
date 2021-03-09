@@ -15,46 +15,20 @@ class index {
     public $open, $close;
 
     public function __construct() {
-        $this->start = [rand(1, $this->w), rand(1, $this->h)];
-        $this->end = [rand(1, $this->w), rand(1, $this->h)];
         for ($i = 0; $i < $this->w; $i++) {
-            for ($j = 0; $j < $this->h; $j++) {
-                $this->map[$i][$j] = rand(0, 5) > 0 ? 0 : 1;
-//                $this->map[$i][$j] = 0;
-//                $this->open[] = [$i, $j];
-                $this->dis[$i][$j] = -1;
+            for ($j = 0; $j < $this->h; $j++) {//随机生成地图
+                $this->map[$i][$j] = rand(0, 5) ? 0 : 1; //0代表可行走，1代表不可行走（墙）
+                $this->dis[$i][$j] = -1; //-1代表还没有检查的点
             }
         }
-//        for ($x = 2; $x < 9; $x++) {
-//            $this->map[$x][2] = 1;
-//        }
-//        for ($y = 2; $y < 9; $y++) {
-//            $this->map[8][$y] = 1;
-//        }
-//        for ($x = 2; $x < 9; $x++) {
-//            $this->map[$x][8] = 1;
-//        }
-//        for ($x = 2; $x < 5; $x++) {
-//            $this->map[$x][5] = 1;
-//        }
-//        for ($x = 6; $x < 8; $x++) {
-//            $this->map[$x][4] = 1;
-//        }
-//        $this->map[6][2] = 0;
-//        for ($j = 0; $j < $this->h; $j++) {
-//            $this->map[rand(1, $this->w)][rand(1, $this->w)] = rand(0, 1);
-//        }
         while (true) {
             $this->start = [rand(1, $this->w), rand(1, $this->h)];
             $this->end = [rand(1, $this->w), rand(1, $this->h)];
             $this->dis[$this->start[0]][$this->start[1]] = 0;
-            if ($this->map[$this->start[0]][$this->start[1]] == 0 && $this->map[$this->end[0]][$this->end[1]] == 0) {
+            if ($this->map[$this->start[0]][$this->start[1]] == 0 && $this->map[$this->end[0]][$this->end[1]] == 0 && $this->start[0] != $this->end[0] && $this->start[1] != $this->end[1]) {
                 break;
             }
         }
-//        $this->dis[1][9] = 0;
-//        $this->disLast[1][9] = [1, 9];
-//        $this->dis[1][9]['path'] = [];
     }
 
     public function main() {
@@ -134,8 +108,8 @@ class index {
         if (isset($this->dis[$cPoint[0]][$cPoint[1] + 1])) {
             if ($this->map[$cPoint[0]][$cPoint[1] + 1] != 0) {
                 $this->dis[$cPoint[0]][$cPoint[1] + 1] = -2;
-            } elseif ($this->dis[$cPoint[0]][$cPoint[1] + 1] == -1 || $this->dis[$cPoint[0]][$cPoint[1] + 1] > $dis + 1.4) {
-                $this->dis[$cPoint[0]][$cPoint[1] + 1] = $dis + 1.4;
+            } elseif ($this->dis[$cPoint[0]][$cPoint[1] + 1] == -1 || $this->dis[$cPoint[0]][$cPoint[1] + 1] > $dis + 1) {
+                $this->dis[$cPoint[0]][$cPoint[1] + 1] = $dis + 1;
                 $this->disLast[$cPoint[0]][$cPoint[1] + 1] = [$cPoint[0], $cPoint[1]];
                 $this->open[] = ($cPoint[0] ) . ',' . ($cPoint[1] + 1);
             }

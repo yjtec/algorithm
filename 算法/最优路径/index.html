@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>canvas</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="player.js?v2"></script>
+    </head>
+    <body style="margin:0px;">
+        <canvas id="cvs" width="500" height="500" style="border:1px solid #c3c3c3;"></canvas>
+        <div id="xycoordinates"></div>
+        <script>
+            window.onload = function () {
+                var c = document.getElementById("cvs");
+                var cxt = c.getContext("2d");
+                var config = {canvas: cxt, box: 50, w: 10, h: 10};
+                var play = new player(config);
+                play.main();
+            }
+        </script>
+    </body>
+</html>
