@@ -43,85 +43,19 @@ class index {
     }
 
     private function getRound8Point($cPoint) {
-        $dis = $this->dis[$cPoint[0]][$cPoint[1]];
-//        $p1 = [$cPoint[0] - 1, $cPoint[1] - 1];
-        if (isset($this->dis[$cPoint[0] - 1][$cPoint[1] - 1])) {
-            if ($this->map[$cPoint[0] - 1][$cPoint[1] - 1] != 0) {
-                $this->dis[$cPoint[0] - 1][$cPoint[1] - 1] = -2;
-            } elseif ($this->dis[$cPoint[0] - 1][$cPoint[1] - 1] == -1 || $this->dis[$cPoint[0] - 1][$cPoint[1] - 1] > $dis + 1.4) {
-                $this->dis[$cPoint[0] - 1][$cPoint[1] - 1] = $dis + 1.4;
-                $this->disLast[$cPoint[0] - 1][$cPoint[1] - 1] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] - 1) . ',' . ($cPoint[1] - 1);
-            }
-        }
-//        $p2 = [$cPoint[0], $cPoint[1] - 1];
-        if (isset($this->dis[$cPoint[0]][$cPoint[1] - 1])) {
-            if ($this->map[$cPoint[0]][$cPoint[1] - 1] != 0) {
-                $this->dis[$cPoint[0]][$cPoint[1] - 1] = -2;
-            } elseif ($this->dis[$cPoint[0]][$cPoint[1] - 1] == -1 || $this->dis[$cPoint[0]][$cPoint[1] - 1] > $dis + 1) {
-                $this->dis[$cPoint[0]][$cPoint[1] - 1] = $dis + 1;
-                $this->disLast[$cPoint[0]][$cPoint[1] - 1] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0]) . ',' . ($cPoint[1] - 1);
-            }
-        }
-//        $p3 = [$cPoint[0] + 1, $cPoint[1] - 1];
-        if (isset($this->dis[$cPoint[0] + 1][$cPoint[1] - 1])) {
-            if ($this->map[$cPoint[0] + 1][$cPoint[1] - 1] != 0) {
-                $this->dis[$cPoint[0] + 1][$cPoint[1] - 1] = -2;
-            } elseif ($this->dis[$cPoint[0] + 1][$cPoint[1] - 1] == -1 || $this->dis[$cPoint[0] + 1][$cPoint[1] - 1] > $dis + 1.4) {
-                $this->dis[$cPoint[0] + 1][$cPoint[1] - 1] = $dis + 1.4;
-                $this->disLast[$cPoint[0] + 1][$cPoint[1] - 1] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] + 1) . ',' . ($cPoint[1] - 1);
-            }
-        }
-//        $p4 = [$cPoint[0] - 1, $cPoint[1]];
-        if (isset($this->dis[$cPoint[0] - 1][$cPoint[1]])) {
-            if ($this->map[$cPoint[0] - 1][$cPoint[1]] != 0) {
-                $this->dis[$cPoint[0] - 1][$cPoint[1]] = -2;
-            } elseif ($this->dis[$cPoint[0] - 1][$cPoint[1]] == -1 || $this->dis[$cPoint[0] - 1][$cPoint[1]] > $dis + 1) {
-                $this->dis[$cPoint[0] - 1][$cPoint[1]] = $dis + 1;
-                $this->disLast[$cPoint[0] - 1][$cPoint[1]] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] - 1) . ',' . ($cPoint[1]);
-            }
-        }
-//        $p5 = [$cPoint[0] + 1, $cPoint[1]];
-        if (isset($this->dis[$cPoint[0] + 1][$cPoint[1]])) {
-            if ($this->map[$cPoint[0] + 1][$cPoint[1]] != 0) {
-                $this->dis[$cPoint[0] + 1][$cPoint[1]] = -2;
-            } elseif ($this->dis[$cPoint[0] + 1][$cPoint[1]] == -1 || $this->dis[$cPoint[0] + 1][$cPoint[1]] > $dis + 1) {
-                $this->dis[$cPoint[0] + 1][$cPoint[1]] = $dis + 1;
-                $this->disLast[$cPoint[0] + 1][$cPoint[1]] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] + 1) . ',' . ($cPoint[1]);
-            }
-        }
-//        $p6 = [$cPoint[0] - 1, $cPoint[1] + 1];
-        if (isset($this->dis[$cPoint[0] - 1][$cPoint[1] + 1])) {
-            if ($this->map[$cPoint[0] - 1][$cPoint[1] + 1] != 0) {
-                $this->dis[$cPoint[0] - 1][$cPoint[1] + 1] = -2;
-            } elseif ($this->dis[$cPoint[0] - 1][$cPoint[1] + 1] == -1 || $this->dis[$cPoint[0] - 1][$cPoint[1] + 1] > $dis + 1.4) {
-                $this->dis[$cPoint[0] - 1][$cPoint[1] + 1] = $dis + 1.4;
-                $this->disLast[$cPoint[0] - 1][$cPoint[1] + 1] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] - 1) . ',' . ($cPoint[1] + 1);
-            }
-        }
-//        $p7 = [$cPoint[0], $cPoint[1] + 1];
-        if (isset($this->dis[$cPoint[0]][$cPoint[1] + 1])) {
-            if ($this->map[$cPoint[0]][$cPoint[1] + 1] != 0) {
-                $this->dis[$cPoint[0]][$cPoint[1] + 1] = -2;
-            } elseif ($this->dis[$cPoint[0]][$cPoint[1] + 1] == -1 || $this->dis[$cPoint[0]][$cPoint[1] + 1] > $dis + 1) {
-                $this->dis[$cPoint[0]][$cPoint[1] + 1] = $dis + 1;
-                $this->disLast[$cPoint[0]][$cPoint[1] + 1] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] ) . ',' . ($cPoint[1] + 1);
-            }
-        }
-//        $p8 = [$cPoint[0] + 1, $cPoint[1] + 1];
-        if (isset($this->dis[$cPoint[0] + 1][$cPoint[1] + 1])) {
-            if ($this->map[$cPoint[0] + 1][$cPoint[1] + 1] != 0) {
-                $this->dis[$cPoint[0] + 1][$cPoint[1] + 1] = -2;
-            } elseif ($this->dis[$cPoint[0] + 1][$cPoint[1] + 1] == -1 || $this->dis[$cPoint[0] + 1][$cPoint[1] + 1] > $dis + 1.4) {
-                $this->dis[$cPoint[0] + 1][$cPoint[1] + 1] = $dis + 1.4;
-                $this->disLast[$cPoint[0] + 1][$cPoint[1] + 1] = [$cPoint[0], $cPoint[1]];
-                $this->open[] = ($cPoint[0] + 1) . ',' . ($cPoint[1] + 1);
+        $distance = $this->dis[$cPoint[0]][$cPoint[1]];
+        for ($x = -1; $x < 2; $x++) {//一列一列的搜索
+            for ($y = -1; $y < 2; $y++) {
+                if ($cPoint[0] + $x >= 0 && $cPoint[1] + $y >= 0 && $cPoint[0] + $x < $this->w && $cPoint[1] + $y < $this->h) {
+                    $temDis = sqrt(pow($x, 2) + pow($y, 2)); //这个点离中心点的距离
+                    if ($this->map[$cPoint[0] + $x][$cPoint[1] + $y] != 0) {//这个点不行走
+                        $this->dis[$cPoint[0] + $x][$cPoint[1] + $y] = -2;
+                    } else if ($this->dis[$cPoint[0] + $x][$cPoint[1] + $y] == -1 || $this->dis[$cPoint[0] + $x][cPoint[1] + $y] > $distance + $temDis) {//这个点没计算过距离，或者这个点的距离比之前的小
+                        $this->dis[$cPoint[0] + $x][cPoint[1] + $y] = $distance + $temDis;
+                        $this->open[] = ($cPoint[0] + $x) . ',' . ($cPoint[1] + $y);
+                        $this->disLast[$cPoint[0] + $x][$cPoint[1] + $y] = [$cPoint[0], $cPoint[1]];
+                    }
+                }
             }
         }
     }

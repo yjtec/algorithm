@@ -13,7 +13,9 @@
             window.onload = function () {
                 var c = document.getElementById("cvs");
                 var cxt = c.getContext("2d");
-                var config = {canvas: cxt, box: 50, w: 10, h: 10};
+                var config = {canvas: cxt, box: 10};
+                config.w = c.width / config.box;
+                config.h = c.height / config.box;
                 var play = new player(config);
                 play.main();
             }
