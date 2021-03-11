@@ -1,19 +1,22 @@
 class player {
     constructor(props) {
-        this.canvas = props.canvas;
-        this.box = props.box;
-        this.w = props.w;
-        this.h = props.h;
-        this.map = new Array();
-        this.dis = new Array();
-        this.start = new Array();
-        this.end = new Array();
-        this.open = new Array();
-        this.disLast = new Array();
-
-        this.cnts = 0;
-
-        this.initMap();
+        this.canvas = props.canvas;//画图用的
+        this.box = props.box;//小正方形的宽高
+        this.w = props.w;//图片最大宽度
+        this.h = props.h;//图片最大高度
+        this.map = new Array();//地图数据，0代表可行走，正数代表不能行走（墙）
+        this.init();
+    }
+    init() {
+        this.dis = new Array();//已经检测过的点距离起始点的距离数据
+        this.start = new Array();//起始点
+        this.end = new Array();//结束点
+        this.open = new Array();//所有待检测的点
+        this.disLast = new Array();//上一点的坐标
+        this.cnts = 0;//总循环次数
+        if (this.map.length <= 0) {
+            this.initMap();
+        }
     }
     initMap() {
         for (var $i = 0; $i < this.w; $i++) {
@@ -38,23 +41,21 @@ class player {
     }
     main() {
         var timestamp = (new Date()).valueOf();
-        var cPoint = this.start;
-        this.getRound8Point(cPoint);
-        var onePoint = this.open.pop()
-        while (onePoint) {
-            cPoint = [parseInt(onePoint[0]), parseInt(onePoint[1])];
-            if (cPoint[0] == this.end[0] && cPoint[1] == this.end[1]) {
+        var cPoint = this.start;//start点设置为当前点
+        do {
+            this.getRound8Point(cPoint);//当前点周围的八个点分别检测，并按照从大到小顺序压入open数组
+            var cPoint = this.open.pop();//取得最后一个元素，也就是最小的元素
+            if (cPoint[0] == this.end[0] && cPoint[1] == this.end[1]) {//如果这个元素是end点，也就是寻找到了结束点，即可跳出循环，这里是跟广度最大的区别，因为上一步取得的是最小点，也就保证了这里跳出的时候，是最短路径
                 break;
             }
-            this.getRound8Point(cPoint);
-            onePoint = this.open.pop();
-        }
+        } while (cPoint);
         var timestamp2 = (new Date()).valueOf();
         console.log("计算路径时长：", (timestamp2 - timestamp) / 1000)
         console.log('循环次数：', this.cnts);
         this.drawMap();
         var timestamp3 = (new Date()).valueOf();
         console.log("画图时长：", (timestamp3 - timestamp2) / 1000)
+        return this.getResult();
     }
     getRound8Point(cPoint) {
         var distance = this.dis[cPoint[0]][cPoint[1]];
@@ -68,7 +69,7 @@ class player {
                         continue;
                     }
 //                    let temDis = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));//这个点离中心点的距离
-                    let temDis = Math.abs(x) - Math.abs(y) == 0 ? 1.414 : 1;
+                    let temDis = Math.abs(x) - Math.abs(y) == 0 ? 1.414 : 1;//这里简化了一步，如果用上一行的距离计算公式也可以
                     if (this.dis[cPoint[0] + x][cPoint[1] + y] == -1 || this.dis[cPoint[0] + x][cPoint[1] + y] > distance + temDis) {//这个点没计算过距离，或者这个点的距离比之前的小
                         this.dis[cPoint[0] + x][cPoint[1] + y] = distance + temDis;
                         this.insertOpen([cPoint[0] + x, cPoint[1] + y]);
@@ -93,6 +94,18 @@ class player {
             }
             this.open.push(point);
         }
+    }
+    getResult() {//路径已经找到，组合成一个数组
+        var result = new Array();
+        var $curLine = this.end;
+        while (true) {
+            result.unshift([this.disLast[$curLine[0]][$curLine[1]][0], this.disLast[$curLine[0]][$curLine[1]][1]]);
+            if ($curLine[0] == this.start[0] && $curLine[1] == this.start[1]) {
+                break;
+            }
+            $curLine = this.disLast[$curLine[0]][$curLine[1]];
+        }
+        return result;
     }
     drawMap() {
 //        console.log(this.disLast)
