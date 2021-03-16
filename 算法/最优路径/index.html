@@ -18,7 +18,7 @@
             cvs.height = 600;
             var play;
             window.onload = function () {
-                var config = {canvas: cxt, box: 10};
+                var config = {canvas: cxt, box: 5};
                 config.w = cvs.width / config.box;
                 config.h = cvs.height / config.box;
                 play = new player(config);
@@ -26,7 +26,7 @@
             }
             function cal() {
                 play.init();
-                play.randStart2End();
+                play.randStart2End(3);
                 var r = play.main();
                 console.log(r)
             }

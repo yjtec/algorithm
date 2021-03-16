@@ -1,11 +1,11 @@
 class player {
     constructor(props) {
-        this.canvas = props.canvas;//画图用的
+        this.canvas = props.canvas || null;//画图用的
         this.box = props.box;//小正方形的宽高
         this.w = props.w;//图片最大宽度
         this.h = props.h;//图片最大高度
-        this.map = new Array();//地图数据，0代表可行走，正数代表不能行走（墙）
-        this.points = new Array();
+        this.map = props.map || new Array();//地图数据，0代表可行走，正数代表不能行走（墙）
+        this.points = props.points || new Array();
         this.results = new Array();
         if (this.map.length <= 0) {
             this.initMap();
@@ -19,28 +19,31 @@ class player {
             }
         }
     }
-    randStart2End() {
-        for (var i = 0; i < 2; i++) {
+    randStart2End(cnt = 5) {
+        this.points.length = 0;
+        for (var i = 0; i < cnt; i++) {
             let point = [parseInt(Math.random() * (this.w - 1) + 1), parseInt(Math.random() * (this.h - 1) + 1)];
+            if (this.map[point[0]][point[1]] != 0) {
+                i--;
+                continue;
+            }
             this.points.push(point);
-//            this.dis[point[0]][point[1]] = 0;
-//            this.disLast[point[0]][point[1]] = [point[0], point[1]];
-//            if (this.map[point[0]][point[1]] != 0) {
-//                i--;
-//            }
         }
+        return true;
     }
     main() {
+        this.cnts = 0;
+        this.results.length = 0;
         for (var x = 0; x < this.points.length - 1; x++) {
-            console.log(x)
             let startPoint = this.points[x];
             let endPoint = this.points[x + 1];
             let line = this.getRoad(startPoint, endPoint)
             this.results.push(line);
         }
-        console.log(this.results)
+        console.log(this.cnts)
         this.drawMap();
-        this.drawRouad();
+        this.drawRoad();
+        this.drawPoints();
         return this.results;
     }
     getRoad(startPoint, endPoint) {
@@ -74,6 +77,7 @@ class player {
         var x, y;
         for (x = -1; x < 2; x++) {//一列一列的搜索
             for (y = -1; y < 2; y++) {
+                this.cnts++;
                 if (cPoint[0] + x >= 0 && cPoint[1] + y >= 0 && cPoint[0] + x < this.w && cPoint[1] + y < this.h) {
                     if (this.map[cPoint[0] + x][cPoint[1] + y] != 0) {//这个点不行走
                         this.dis[cPoint[0] + x][cPoint[1] + y] = -2;
@@ -119,6 +123,9 @@ class player {
         return result;
     }
     drawMap() {
+        if (!this.canvas) {
+            return;
+        }
 //        console.log(this.disLast)
         for (var $i = 0; $i < this.w; $i++) {
             for (var $j = 0; $j < this.h; $j++) {
@@ -127,23 +134,38 @@ class player {
             }
         }
     }
-    drawRouad() {
-        for (var x = 0; x < this.results.length - 1; x++) {
+    drawRoad() {
+        if (!this.canvas) {
+            return;
+        }
+        for (var x = 0; x < this.results.length; x++) {
             var curRoad = this.results[x];
             for (var y = 0; y < curRoad.length; y++) {
                 this.drawBox(curRoad[y][0] * this.box, curRoad[y][1] * this.box, this.box, "#00FF00");
             }
-            this.drawBox(curRoad[0][0] * this.box, curRoad[0][1] * this.box, this.box, "#00F0F0");
-            this.drawText(x, curRoad[0][0] * this.box, curRoad[0][1] * this.box + 8);
         }
-//        this.drawBox(this.results[x][y][0] * this.box, this.results[x][y][1] * this.box, this.box, "#00FFFF");
+    }
+    drawPoints() {
+        if (!this.canvas) {
+            return;
+        }
+        for (var x = 0; x < this.points.length; x++) {
+            this.drawBox(this.points[x][0] * this.box, this.points[x][1] * this.box, this.box, "#00F0F0");
+            this.drawText(x, this.points[x][0] * this.box, this.points[x][1] * this.box + 8);
+        }
     }
     drawText(text, x, y) {
+        if (!this.canvas) {
+            return;
+        }
         this.canvas.font = '10px Arial';
         this.canvas.fillStyle = '#000000';
         this.canvas.fillText(text, x, y);
     }
     drawBox(x, y, w, color, fill = true) {
+        if (!this.canvas) {
+            return;
+        }
         this.canvas.fillStyle = color;
         if (fill) {//填充方块儿
             this.canvas.fillRect(x, y, w, w);
