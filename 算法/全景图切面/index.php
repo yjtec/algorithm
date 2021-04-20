@@ -27,16 +27,175 @@ class index {
 //        $this->getFace(4, 1250, 1250);
 //        $this->getFace(5, 1250, 1250);
 //        $this->ax(500, 500);
-        $this->getPc(-pi() / 4, -pi() / 4, -pi() / 4, pi() / 4);
-        $this->getPc2(-pi() / 4, -pi() / 4, -pi() / 4, pi() / 4);
+//        $this->getPc(-pi() / 4, -pi() / 4, -pi() / 4, pi() / 4);
+//        $this->getPc2(-pi() / 4, -pi() / 4, deg2rad(-60), pi() / 4);
+        $ltM = ['theta' => deg2rad(-45), 'phi' => deg2rad(-20)];
+        $ltL = ['theta' => deg2rad(-45), 'phi' => deg2rad(50)];
+        $pM = $this->lt2xyz($ltM['theta'], $ltM['phi'], 1);
+        $pL = $this->lt2xyz($ltL['theta'], $ltL['phi'], 1);
+//        $pM = ['x' => -4, 'y' => 4, 'z' => -4];
+//        $pL = ['x' => 4, 'y' => 4, 'z' => -4];
+//        var_dump($pM,$pL);return;
+        $this->getPc3($pM, $pL);
     }
 
     /**
-     * 
-      face[1][theta1]: -40.85987437067253
-      face[1][phi1]: 48.96041732327967
-      face[1][theta2]: -29.36619455831468
-      face[1][phi2]: -175.0027853383456
+     * @param type $thetaM
+     * @param type $phiM
+     * @param type $thetaL
+     * @param type $phiL
+     */
+    public function getPc3($pM, $pL) {
+        $pO = ['x' => 0, 'y' => 0, 'z' => 0];
+        $pN = ['x' => $pM['x'], 'y' => -$pM['y'], 'z' => $pM['z']];
+        $pQ = ['x' => $pL['x'], 'y' => -$pL['y'], 'z' => $pL['z']];
+//        $r = 1;
+//        $jiao_ROP = abs($phiL - $phiM) < pi() ? $phiL - $phiM : pi() * 2 + $phiL - $phiM;
+//        $jiao_MON = $thetaM + $thetaM;
+//        $jiao_LOQ = $thetaL + $thetaL;
+        $pR = ['x' => ($pM['x'] + $pN['x']) / 2, 'y' => ($pM['y'] + $pN['y']) / 2, 'z' => ($pM['z'] + $pN['z']) / 2];
+        $pP = ['x' => ($pL['x'] + $pQ['x']) / 2, 'y' => ($pL['y'] + $pQ['y']) / 2, 'z' => ($pL['z'] + $pQ['z']) / 2];
+
+        $len_MN = $this->distance($pM, $pN);
+        $len_LQ = $this->distance($pL, $pQ);
+        $len_OR = $this->distance($pO, $pR);
+        $len_OP = $this->distance($pO, $pP);
+        $len_RP = $this->distance($pR, $pP);
+        $len_OM = $this->distance($pO, $pM);
+        $len_ON = $this->distance($pO, $pN);
+        $len_OL = $this->distance($pO, $pL);
+        $len_OQ = $this->distance($pO, $pQ);
+        $len_ML = $this->distance($pM, $pL);
+        $len_NQ = $this->distance($pN, $pQ);
+        $jiao_ROP = $this->jiao($len_RP, $len_OR, $len_OP);
+        $jiao_MON = $this->jiao($len_MN, $len_OM, $len_ON);
+        $jiao_LOQ = $this->jiao($len_LQ, $len_OL, $len_OQ);
+
+//        $h = intval(abs(max($len_MN, $len_LQ) / $len_RP) * 500);
+        $h = 500;
+        $w = intval($len_RP / max($len_MN, $len_LQ) * $h);
+//        var_dump($len_MN, $len_LQ, $len_RP);
+//        var_dump($w, $h);
+//        exit;
+        $disImg = imagecreatetruecolor($w, $h);
+
+        $area_ROP = 0.5 * $len_OR * $len_OP * sin($jiao_ROP);
+        $len_OW = $area_ROP / $len_RP * 2;
+        $len_RW = sqrt(pow($len_OR, 2) - pow($len_OW, 2));
+        $jiao_LMG = acos($len_RP / $len_ML);
+        $jiao_xOR = -atan($pR['z'] / $pR['x']);
+//        $jiao_ORP = asin($area_ROP / 0.5 / $len_OR / $len_RP);
+        for ($x = 0; $x < $w; $x++) {
+            $len_RT = $x / $w * $len_RP;
+            $jiao_ROT = $len_RT / $len_RP * $jiao_ROP;
+            $len_TW = abs($len_RW - $len_RT);
+//            $len_OT = hypot($len_OW, $len_TW);
+            $jiao_TOW = $len_TW / $len_RP * $jiao_ROP;
+            $len_OT = $len_OW / cos($jiao_TOW);
+            $len_MS = $len_ML * $len_RT / $len_RP;
+            $len_ST = $len_MN / 2 + $len_MS * sin($jiao_LMG);
+            for ($y = 0; $y < $h; $y++) {
+                $len_HT = ($h / 2 - $y) / $h * $len_ST;
+                $S_theta = $jiao_TOH = -atan($len_HT / $len_OT);
+                $S_phi = $jiao_ROT + $jiao_xOR; // + $phiM
+                $u = $S_phi / pi() / 2 + 0.5;
+                $v = $S_theta / pi() + 0.5;
+                $m = intval($u * $this->w);
+                $n = intval($v * $this->h);
+                $rgb = imagecolorat($this->pano, $m % $this->w, $n);
+                imagesetpixel($disImg, $x, $y, $rgb);
+            }
+        }
+        imagepng($disImg, __DIR__ . '/x3.png');
+        imagedestroy($disImg);
+    }
+
+    public function distance($pA, $pB) {
+        return sqrt(pow($pB['x'] - $pA['x'], 2) + pow($pB['y'] - $pA['y'], 2) + pow($pB['z'] - $pA['z'], 2));
+    }
+
+    /**
+     * 已知三角形三边，求a对应的角
+     * @param type $a
+     * @param type $b
+     * @param type $c
+     * @return type
+     */
+    public function jiao($a, $b, $c) {
+        return acos(($b * $b + $c * $c - $a * $a) / 2 / $b / $c);
+    }
+
+    public function lt2xyz($theta, $phi, $r) {
+        $x = cos($theta) * cos($phi) * $r;
+        $y = sin($theta) * $r;
+        $z = -cos($theta) * sin($phi) * $r;
+        return ['x' => $x, 'y' => $y, 'z' => $z];
+    }
+
+    /**
+     * @param type $thetaM
+     * @param type $phiM
+     * @param type $thetaL
+     * @param type $phiL
+     */
+    public function getPc2($thetaM, $phiM, $thetaL, $phiL) {
+        $r = 1;
+        $jiao_ROP = abs($phiL - $phiM) < pi() ? $phiL - $phiM : pi() * 2 + $phiL - $phiM;
+
+        $jiao_MON = $thetaM + $thetaM;
+        $len_MN = (sin($jiao_MON / 2) * $r * 2);
+        $len_OR = sqrt(pow($r, 2) - pow($len_MN / 2, 2));
+        $jiao_LOQ = $thetaL + $thetaL;
+        $len_LQ = (sin($jiao_LOQ / 2) * $r * 2);
+        $len_OP = sqrt(pow($r, 2) - pow($len_LQ / 2, 2));
+
+        $len_RP = sqrt(pow($len_OR, 2) + pow($len_OP, 2) - 2 * $len_OP * $len_OR * cos($jiao_ROP));
+        $len_ML = $len_NQ = sqrt(pow($len_LQ / 2 - $len_MN / 2, 2) + pow($len_RP, 2));
+
+        $h = intval(abs(max($len_MN, $len_LQ) / $len_RP) * 500);
+        $w = intval(abs($len_RP / max($len_MN, $len_LQ)) * 500);
+        $disImg = imagecreatetruecolor($w, $h);
+
+        $area_ROP = 0.5 * $len_OR * $len_OP * sin($jiao_ROP);
+        $len_OW = $area_ROP / $len_RP * 2;
+        $len_RW = sqrt(pow($len_OR, 2) - pow($len_OW, 2));
+        $jiao_LMG = acos($len_RP / $len_ML);
+//        $jiao_ORP = asin($area_ROP / 0.5 / $len_OR / $len_RP);
+        for ($x = 0; $x < $w; $x++) {
+            $len_RT = $x / $w * $len_RP;
+            $jiao_ROT = $len_RT / $len_RP * $jiao_ROP;
+            $len_TW = abs($len_RW - $len_RT);
+//            $len_OT = hypot($len_OW, $len_TW);
+            $jiao_TOW = $len_TW / $len_RP * $jiao_ROP;
+            $len_OT = $len_OW / cos($jiao_TOW);
+            if ($len_OT == 0) {
+                var_dump($jiao_TOW);
+                exit;
+            }
+            $len_MS = $len_ML * $len_RT / $len_RP;
+            $len_ST = $len_MN / 2 + $len_MS * sin($jiao_LMG);
+//            $len_MS = $x / $w * $len_ML;
+//            $len_SV = $len_ML / 2 - $len_MS;
+//            $jiao_MUS = $len_MS / $len_ML * $jiao_MUL;
+//            $jiao_SUV = $len_SV / $len_ML * $jiao_MUL;
+//            $len_US = $len_UV / cos($jiao_SUV);
+            for ($y = 0; $y < $h; $y++) {
+                $len_HT = ($h / 2 - $y) / $h * $len_ST * 2;
+                $S_theta = $jiao_TOH = atan($len_HT / $len_OT);
+                $S_phi = $jiao_ROT + $phiM;
+                $u = $S_phi / pi() / 2 + 0.5;
+                $v = $S_theta / pi() + 0.5;
+                $m = intval($u * $this->w);
+                $n = intval($v * $this->h);
+                $rgb = imagecolorat($this->pano, $m % $this->w, $n);
+                imagesetpixel($disImg, $x, $y, $rgb);
+            }
+        }
+        imagepng($disImg, __DIR__ . '/x2.png');
+        imagedestroy($disImg);
+    }
+
+    /**
      * @param type $theta1
      * @param type $phi1
      * @param type $theta2
@@ -74,66 +233,6 @@ class index {
         imagepng($disImg, __DIR__ . '/x.png');
         imagedestroy($disImg);
     }
-
-    /**
-     * @param type $thetaM
-     * @param type $phiM
-     * @param type $thetaL
-     * @param type $phiL
-     */
-    public function getPc2($thetaM, $phiM, $thetaL, $phiL) {
-        $r = 1;
-        $jiao_ROP = abs($phiL - $phiM) < pi() ? $phiL - $phiM : pi() * 2 + $phiL - $phiM;
-
-        $jiao_MON = $thetaM + $thetaM;
-        $len_MN = (sin($jiao_MON / 2) * $r * 2);
-        $len_OR = sqrt(pow($r, 2) - pow($len_MN / 2, 2));
-        $jiao_LOQ = $thetaL + $thetaL;
-        $len_LQ = (sin($jiao_LOQ / 2) * $r * 2);
-        $len_OP = sqrt(pow($r, 2) - pow($len_LQ / 2, 2));
-
-        $len_RP = sqrt(pow($len_OR, 2) + pow($len_OP, 2) - 2 * $len_OP * $len_OR * cos($jiao_ROP));
-        $len_ML = $len_NQ = sqrt(pow($len_LQ / 2 - $len_MN / 2, 2) + pow($len_RP, 2));
-
-        $h = intval(abs(max($len_MN, $len_LQ) / $len_RP) * 500);
-        $w = intval(abs($len_RP / max($len_MN, $len_LQ)) * 500);
-        $disImg = imagecreatetruecolor($w, $h);
-
-        $area_ROP = 0.5 * $len_OR * $len_OP * sin($jiao_ROP);
-        $len_OW = $area_ROP / $len_RP * 2;
-        $len_RW = sqrt(pow($len_OR, 2) - pow($len_OW, 2));
-        $jiao_LMG = acos($len_RP / $len_ML);
-//        $jiao_ORP = asin($area_ROP / 0.5 / $len_OR / $len_RP);
-        for ($x = 0; $x < $w; $x++) {
-            $len_RT = $x / $w * $len_RP;
-            $jiao_ROT = $len_RT / $len_RP * $jiao_ROP;
-            $len_TW = abs($len_RW - $len_RT);
-            $len_OT = hypot($len_OW, $len_TW);
-            $jiao_TOW = $len_TW / $len_RP * $jiao_ROP;
-            $len_OT = $len_OW / cos($jiao_TOW);
-            $len_MS = $len_ML * $len_RT / $len_RP;
-            $len_ST = $len_MN / 2 + $len_MS * sin($jiao_LMG);
-//            $len_MS = $x / $w * $len_ML;
-//            $len_SV = $len_ML / 2 - $len_MS;
-//            $jiao_MUS = $len_MS / $len_ML * $jiao_MUL;
-//            $jiao_SUV = $len_SV / $len_ML * $jiao_MUL;
-//            $len_US = $len_UV / cos($jiao_SUV);
-            for ($y = 0; $y < $h; $y++) {
-                $len_HT = ($h / 2 - $y) / $h * $len_ST * 2;
-                $S_theta = $jiao_TOH = atan($len_HT / $len_OT);
-                $S_phi = $jiao_ROT + $phiM;
-                $u = $S_phi / pi() / 2 + 0.5;
-                $v = $S_theta / pi() + 0.5;
-                $m = intval($u * $this->w);
-                $n = intval($v * $this->h);
-                $rgb = imagecolorat($this->pano, $m % $this->w, $n);
-                imagesetpixel($disImg, $x, $y, $rgb);
-            }
-        }
-        imagepng($disImg, __DIR__ . '/x2.png');
-        imagedestroy($disImg);
-    }
-
 
     public function getFace($sideId, $w, $h) {
         $disImg = imagecreatetruecolor($w, $h);
