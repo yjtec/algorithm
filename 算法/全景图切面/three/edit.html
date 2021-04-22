@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js sphere panorama</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	</head>
+	<body  oncontextmenu="return false">
+		<div id="container"></div>
+		<script type="module">
+ 
+			import * as THREE from './three.module.js';
+			var scene,renderer,camera;
+			var cube,skyBox;
+			var container = document.getElementById( 'container' );
+ 
+		
+			initEvent();
+			initScene();
+			addLines();
+			//addSphere();
+			addPano();
+			animate();
+			
+			function initScene(){
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				scene = new THREE.Scene();
+				camera = new THREE.PerspectiveCamera( 120, window.innerWidth / window.innerHeight, 0.1, 500 );
+				camera.position.set(0,0,0);
+			}
+			function addLines(){
+				var points = [
+					[7, 4, -4.7],
+					[5.3, 4, -0.7],
+					[13.5, 4, 2.7],
+					[11.5, 4, 9],
+					[4, 4, 4.6],
+					[-8.7, 4, -0.7],
+					[-4, 4, -10],
+				];
+				for(var i=0;i<points.length;i++){
+					let next=(i+1==points.length?0:i+1);
+					addALine(new THREE.Vector3(points[i][0], points[i][1], points[i][2]),new THREE.Vector3(points[next][0], points[next][1], points[next][2]),0xFF00FF);
+					addALine(new THREE.Vector3(points[i][0], points[i][1], points[i][2]),new THREE.Vector3(points[i][0], -points[i][1], points[i][2]),0xF0000F);
+					addALine(new THREE.Vector3(points[i][0], -points[i][1], points[i][2]),new THREE.Vector3(points[next][0], -points[next][1], points[next][2]),0x0F00F0);
+				}
+			}
+			function addALine(startPoint,endPoint,color=0xFF0000){
+				var geometry = new THREE.Geometry();
+				geometry.vertices.push(startPoint,endPoint);
+                var material = new THREE.MeshBasicMaterial();
+				material = new THREE.LineBasicMaterial({ color:color });
+				var line = new THREE.Line(geometry, material);
+				scene.add(line);
+			}
+			
+			function addSphere(){
+				var geometry = new THREE.SphereGeometry(1,10,10);
+				var material = new THREE.MeshLambertMaterial({color: 0xFF0000});
+				var mesh = new THREE.Mesh(geometry,material);
+				scene.add(mesh);
+			}
+			
+			function addPano(){
+                var material = new THREE.MeshBasicMaterial({map:new THREE.TextureLoader().load( 'pano.jpg' )});
+ 
+				skyBox = new THREE.Mesh(
+					new THREE.SphereBufferGeometry(100, 100, 100),
+					material
+				);
+				skyBox.geometry.scale( 1, 1, -1 );
+				scene.add( skyBox );
+			}
+			
+			function addCube(){
+				cube = new THREE.Mesh(new THREE.CubeGeometry(20, 20, 20),
+					new THREE.MeshBasicMaterial({
+						wireframe : true,
+						color: 0xff0000
+					})
+				);
+				scene.add(cube);
+			}
+ 
+			function initEvent() {
+ 
+				window.addEventListener( 'resize', onWindowResize, false );
+				
+				var bMouseDown = false;
+				var x = -1;
+				var y =-1;
+				container.onmousedown=function(event){
+					event.preventDefault();
+					x=event.clientX;
+					y=event.clientY;
+					bMouseDown = true;
+				}
+				container.onmouseup=function(event){
+					event.preventDefault();
+					bMouseDown = false;
+				}
+				container.onmousemove=function(event){
+					event.preventDefault();
+					if(bMouseDown)
+					{
+						camera.rotation.y += -0.005*(event.clientX-x);
+						camera.rotation.x += -0.005*(event.clientY-y);
+						
+						x=event.clientX;
+						y=event.clientY;
+					}
+				}
+				container.onmousewheel=function(event){
+					event.preventDefault();
+					if(event.wheelDelta!=0){
+						camera.fov+=event.wheelDelta>0?1:-1;
+						if(camera.fov>150)
+						{
+						  camera.fov=150;
+						}
+						else if(camera.fov < 30)
+						{
+							camera.fov = 30;
+						}
+						camera.updateProjectionMatrix();
+					}
+				}
+				document.onkeydown=function(e){
+					var e = e || window.event;  //标准化事件处理
+					console.log(e.keyCode);
+					switch(e.keyCode){
+						case 37://左
+							camera.position.x--;
+							break;
+						case 38://上
+							camera.position.y++;
+							break;
+						case 39://右
+							camera.position.x++;
+							break;
+						case 4://下
+							camera.position.y--;
+							break;
+						case 83://s
+							camera.position.z++;
+							break;
+						case 87://w
+							camera.position.z--;
+							break;
+					}
+					//var worldPosition = new THREE.Vector3();
+					//cube.getWorldPosition(worldPosition)
+					//console.log('原始顶点坐标',cube.geometry.vertices);
+				}
+			}
+			function onWindowResize() {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+			}
+ 
+			function animate() {
+				requestAnimationFrame( animate );
+				renderer.render( scene, camera );
+			}
+ 
+		</script>
+	</body>
+</html>
