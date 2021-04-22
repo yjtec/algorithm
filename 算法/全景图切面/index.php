@@ -29,13 +29,40 @@ class index {
 //        $this->ax(500, 500);
 //        $this->getPc(-pi() / 4, -pi() / 4, -pi() / 4, pi() / 4);
 //        $this->getPc2(-pi() / 4, -pi() / 4, deg2rad(-60), pi() / 4);
-        $ltM = ['theta' => deg2rad(-45), 'phi' => deg2rad(-20)];
-        $ltL = ['theta' => deg2rad(-45), 'phi' => deg2rad(50)];
-        $pM = $this->lt2xyz($ltM['theta'], $ltM['phi'], 1);
-        $pL = $this->lt2xyz($ltL['theta'], $ltL['phi'], 1);
-//        $pM = ['x' => -4, 'y' => 4, 'z' => -4];
-//        $pL = ['x' => 4, 'y' => 4, 'z' => -4];
-//        var_dump($pM,$pL);return;
+        $ltM = ['theta' => deg2rad(-35), 'phi' => deg2rad(-45)];
+//        $ltL = ['theta' => deg2rad(-35), 'phi' => deg2rad(45)];
+//        $ltM = ['theta' => deg2rad(-35), 'phi' => deg2rad(135)];
+        $ltL = ['theta' => deg2rad(-35), 'phi' => deg2rad(-135)];
+        $r = sqrt(2);
+        $pM = $this->lt2xyz($ltM['theta'], $ltM['phi'], $r);
+        $pL = $this->lt2xyz($ltL['theta'], $ltL['phi'], $r);
+        $points = [
+            ['x' => 4, 'y' => 4, 'z' => -4],
+            ['x' => 10, 'y' => 4, 'z' => 4],
+            ['x' => -4, 'y' => 4, 'z' => 4],
+            ['x' => -4, 'y' => 4, 'z' => -4]
+        ];
+        $face = 'f';
+        switch ($face) {
+            case 'f':
+                $pM = $points[0];
+                $pL = $points[1];
+                break;
+            case 'r':
+                $pM = $points[1];
+                $pL = $points[2];
+                break;
+            case 'b':
+                $pM = $points[2];
+                $pL = $points[3];
+                break;
+            case 'l':
+                $pM = $points[3];
+                $pL = $points[0];
+                break;
+        }
+//        $pM = ['x' => -0.81915204428899, 'y' => 0.81115957534528, 'z' => -0.81915204428899];
+//        $pL = ['x' => 0.81915204428899, 'y' => 0.81115957534528, 'z' => -0.81915204428899];
         $this->getPc3($pM, $pL);
     }
 
@@ -70,38 +97,40 @@ class index {
         $jiao_ROP = $this->jiao($len_RP, $len_OR, $len_OP);
         $jiao_MON = $this->jiao($len_MN, $len_OM, $len_ON);
         $jiao_LOQ = $this->jiao($len_LQ, $len_OL, $len_OQ);
+        $jiao_OPR = $this->jiao($len_OR, $len_OP, $len_RP);
+        $jiao_ORP = $this->jiao($len_OP, $len_OR, $len_RP);
+//        $area_ROP = 0.5 * $len_OR * $len_OP * sin($jiao_ROP);
+//        $len_OW = $area_ROP / $len_RP * 2;
+//        $len_RW = sqrt(pow($len_OR, 2) - pow($len_OW, 2));
 
-//        $h = intval(abs(max($len_MN, $len_LQ) / $len_RP) * 500);
         $h = 500;
-        $w = intval($len_RP / max($len_MN, $len_LQ) * $h);
-//        var_dump($len_MN, $len_LQ, $len_RP);
-//        var_dump($w, $h);
-//        exit;
+        $c = $this->thirdLen(min($len_OR, $len_OQ), min($len_OR, $len_OQ), $jiao_ROP);
+        $w = intval($c / max($len_MN, $len_LQ) * $h);
         $disImg = imagecreatetruecolor($w, $h);
-
-        $area_ROP = 0.5 * $len_OR * $len_OP * sin($jiao_ROP);
-        $len_OW = $area_ROP / $len_RP * 2;
-        $len_RW = sqrt(pow($len_OR, 2) - pow($len_OW, 2));
         $jiao_LMG = acos($len_RP / $len_ML);
-        $jiao_xOR = -atan($pR['z'] / $pR['x']);
-//        $jiao_ORP = asin($area_ROP / 0.5 / $len_OR / $len_RP);
+        $jiao_xOR = -(($pR['x'] < 0 ? pi() : 0) + atan(-$pR['z'] / $pR['x']));
+//        exit;
         for ($x = 0; $x < $w; $x++) {
             $len_RT = $x / $w * $len_RP;
-            $jiao_ROT = $len_RT / $len_RP * $jiao_ROP;
-            $len_TW = abs($len_RW - $len_RT);
-//            $len_OT = hypot($len_OW, $len_TW);
-            $jiao_TOW = $len_TW / $len_RP * $jiao_ROP;
-            $len_OT = $len_OW / cos($jiao_TOW);
+//            $jiao_ROT = $len_RT / $len_RP * $jiao_ROP;
+//            $len_TW = abs($len_RW - $len_RT);
+//            $jiao_TOW = $len_TW / $len_RP * $jiao_ROP;
+//            $jiao_TOW = atan($len_TW / $len_OW);
+//            $len_OT = $len_OW / cos($jiao_TOW);
+//            $len_OT = atan($len_TW / $len_OW);
+            $len_OT = $this->thirdLen($len_RT, $len_OR, $jiao_ORP);
+            $jiao_ROT = $this->jiao($len_RT, $len_OR, $len_OT);
             $len_MS = $len_ML * $len_RT / $len_RP;
             $len_ST = $len_MN / 2 + $len_MS * sin($jiao_LMG);
             for ($y = 0; $y < $h; $y++) {
-                $len_HT = ($h / 2 - $y) / $h * $len_ST;
+                $len_HT = (1 - $y / ($h / 2)) * $len_ST;
                 $S_theta = $jiao_TOH = -atan($len_HT / $len_OT);
                 $S_phi = $jiao_ROT + $jiao_xOR; // + $phiM
                 $u = $S_phi / pi() / 2 + 0.5;
                 $v = $S_theta / pi() + 0.5;
                 $m = intval($u * $this->w);
                 $n = intval($v * $this->h);
+                $m = $m < 0 ? $this->w + $m : $m;
                 $rgb = imagecolorat($this->pano, $m % $this->w, $n);
                 imagesetpixel($disImg, $x, $y, $rgb);
             }
@@ -125,11 +154,21 @@ class index {
         return acos(($b * $b + $c * $c - $a * $a) / 2 / $b / $c);
     }
 
+    public function thirdLen($a, $b, $jiao_ab) {
+        return sqrt($a * $a + $b * $b - 2 * $a * $b * cos($jiao_ab));
+    }
+
     public function lt2xyz($theta, $phi, $r) {
         $x = cos($theta) * cos($phi) * $r;
         $y = sin($theta) * $r;
         $z = -cos($theta) * sin($phi) * $r;
         return ['x' => $x, 'y' => $y, 'z' => $z];
+    }
+
+    public function xyz2lt($x, $y, $z, $r) {
+        $phi = atan(-$z / $x);
+        $theta = asin($y / ($x * $x + $y * $y + $z * $z));
+        return ['theta' => $theta, 'phi' => $phi];
     }
 
     /**
