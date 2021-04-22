@@ -25,19 +25,28 @@ class index {
 //        $r = sqrt(2);
 //        $pM = $this->lt2xyz($ltM['theta'], $ltM['phi'], $r);
 //        $pL = $this->lt2xyz($ltL['theta'], $ltL['phi'], $r);
+//        $points = [
+//            ['x' => 4, 'y' => 4, 'z' => -4],
+//            ['x' => 6, 'y' => 4, 'z' => 0],
+//            
+//            ['x' => 4, 'y' => 4, 'z' => 4],
+//            ['x' => 0, 'y' => 4, 'z' => 6],
+//            
+//            ['x' => -4, 'y' => 4, 'z' => 4],
+//            ['x' => -6, 'y' => 4, 'z' => 0],
+//            
+//            ['x' => -4, 'y' => 4, 'z' => -4],
+//            ['x' => 0, 'y' => 4, 'z' => -6],
+//            
+//        ];
         $points = [
-            ['x' => 4, 'y' => 4, 'z' => -4],
-            ['x' => 6, 'y' => 4, 'z' => 0],
-            
-            ['x' => 4, 'y' => 4, 'z' => 4],
-            ['x' => 0, 'y' => 4, 'z' => 6],
-            
-            ['x' => -4, 'y' => 4, 'z' => 4],
-            ['x' => -6, 'y' => 4, 'z' => 0],
-            
-            ['x' => -4, 'y' => 4, 'z' => -4],
-            ['x' => 0, 'y' => 4, 'z' => -6],
-            
+            ['x' => 7, 'y' => 4, 'z' => -4.7],
+            ['x' => 5.3, 'y' => 4, 'z' => -0.7],
+            ['x' => 13.5, 'y' => 4, 'z' => 2.7],
+            ['x' => 11.5, 'y' => 4, 'z' => 9],
+            ['x' => 4, 'y' => 4, 'z' => 4.6],
+            ['x' => -8.7, 'y' => 4, 'z' => -0.7],
+            ['x' => -4, 'y' => 4, 'z' => -10],
         ];
         for ($i = 0; $i < count($points); $i++) {
             $next = $i + 1 == count($points) ? 0 : $i + 1;
@@ -76,12 +85,14 @@ class index {
         $jiao_ORP = $this->jiao($len_OP, $len_OR, $len_RP);
 
         $h = 500;
-        $c = $this->thirdLen(min($len_OR, $len_OQ), min($len_OR, $len_OQ), $jiao_ROP);
-        $w = intval($c / max($len_MN, $len_LQ) * $h);
+        $len_RY = $this->thirdLen(min($len_OR, $len_OQ), min($len_OR, $len_OQ), $jiao_ROP);
+        $w = intval($len_RY / max($len_MN, $len_LQ) * $h);
         $disImg = imagecreatetruecolor($w, $h);
         $jiao_LMG = acos($len_RP / $len_ML);
         $jiao_xOR = -(($pR['x'] < 0 ? pi() : 0) + atan(-$pR['z'] / $pR['x']));
-//        exit;
+
+        $jiao_xOW = pi() - ($jiao_xOR - $jiao_ORP); //这个真好用！！，这个角用于在渲染场景时，当前切片图绕Y轴旋转多少角度
+        file_put_contents('./jiao.log', $jiao_xOW . ',' . PHP_EOL, FILE_APPEND);
         for ($x = 0; $x < $w; $x++) {
             $len_RT = $x / $w * $len_RP;
             $len_OT = $this->thirdLen($len_RT, $len_OR, $jiao_ORP);
