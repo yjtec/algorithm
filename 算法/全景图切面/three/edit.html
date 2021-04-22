@@ -4,6 +4,7 @@
 		<title>three.js sphere panorama</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<script src="data.js"></script>
 	</head>
 	<body  oncontextmenu="return false">
 		<div id="container"></div>
@@ -32,15 +33,6 @@
 				camera.position.set(0,0,0);
 			}
 			function addLines(){
-				var points = [
-					[7, 4, -4.7],
-					[5.3, 4, -0.7],
-					[13.5, 4, 2.7],
-					[11.5, 4, 9],
-					[4, 4, 4.6],
-					[-8.7, 4, -0.7],
-					[-4, 4, -10],
-				];
 				for(var i=0;i<points.length;i++){
 					let next=(i+1==points.length?0:i+1);
 					addALine(new THREE.Vector3(points[i][0], points[i][1], points[i][2]),new THREE.Vector3(points[next][0], points[next][1], points[next][2]),0xFF00FF);
