@@ -1,175 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>show</title>
-    <style>
-        #container{
-            width: 100%;
-            height: 800px;
-        }
-    </style>
-    <script src="three.js"></script>
-    <script src="data.js"></script>
-</head>
-<body>
-    <div id="container"></div>
-    <script>
-			var camera, scene, renderer;
-			var mesh;
-			var container = document.getElementById( 'container' );
-			var bili=1;
-			initEvent();
-			initScene();
-			addPanos();
-			animate();
-			
-			function initScene(){
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
-				scene = new THREE.Scene();
-				camera = new THREE.PerspectiveCamera( 120, window.innerWidth / window.innerHeight, 0.1, 10000 );
-				camera.position.set(0,0,0);
-			}
-			function addPanos() {
-				for(var i=0;i<points.length;i++){
-					let next=(i+1==points.length?0:i+1);
-					let center=getCenter(points[i],points[next]);
-					let width=distance(points[i],points[next]);
-					let height=distance(points[i],[points[i][0],-points[i][1],points[i][2]]);
-					console.log(height);
-					//addPlane(center,width, height,jiaos[i]);
-					addPano("x"+i+".png",center,width, height,jiaos[i],width[i]);
-				}
-			}
-			function addPano(img,center,width, height,jiao){
-				var texture=new THREE.TextureLoader().load( img);
-				var material = new THREE.MeshBasicMaterial( { map: texture } );
-				var quad = new THREE.PlaneBufferGeometry( width, height );
-				var face = new THREE.Mesh( quad, material );
-				face.position.set(center[0]*bili,center[1]*bili,center[2]*bili);
-				face.rotation.y =jiao;
-				scene.add( face );
-			}
-			function addPlane(center,width, height,jiao){
-				let plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-					new THREE.MeshBasicMaterial({
-						color: 0xff0000,
-						wireframe: true
-					})
-				)
-				plane.position.set(center[0]*bili,center[1]*bili,center[2]*bili);
-				plane.rotation.y =jiao;
-				scene.add(plane);
-			}
-			
-			function addALine(startPoint,endPoint,color=0xFF0000){
-				var geometry = new THREE.Geometry();
-				geometry.vertices.push(new THREE.Vector3(startPoint[0],startPoint[1],startPoint[2]),new THREE.Vector3(endPoint[0],endPoint[1],endPoint[2]));
-                var material = new THREE.MeshBasicMaterial();
-				material = new THREE.LineBasicMaterial({ color:color });
-				var line = new THREE.Line(geometry, material);
-				scene.add(line);
-			}
-			function getCenter(pA,pB){
-				var pC=[pA[0],-pA[1],pA[2]];
-				var pD=[pB[0],-pB[1],pB[2]];
-				return [(pA[0]+pC[0]+pB[0]+pD[0])/4,(pA[1]+pC[1]+pB[1]+pD[1])/4,(pA[2]+pC[2]+pB[2]+pD[2])/4];
-			}
-			
-			function distance(pA, pB) {
-				return Math.sqrt(Math.pow(pB[0] - pA[0], 2) + Math.pow(pB[1] - pA[1], 2) + Math.pow(pB[2] - pA[2], 2));
-			}
-			function r2d(rad) {
-				return rad * 180 / Math.PI;
-			}
-			function d2r(degree){
-				return degree * Math.PI / 180;
-			}
-			function onWindowResize() {
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-				renderer.setSize( window.innerWidth, window.innerHeight );
-			}
-			function animate() {
-				requestAnimationFrame( animate );
-				renderer.render( scene, camera );
-			}
-			
-			function initEvent() {
- 
-				window.addEventListener( 'resize', onWindowResize, false );
-				
-				var bMouseDown = false;
-				var x = -1;
-				var y =-1;
-				container.onmousedown=function(event){
-					event.preventDefault();
-					x=event.clientX;
-					y=event.clientY;
-					bMouseDown = true;
-				}
-				container.onmouseup=function(event){
-					event.preventDefault();
-					bMouseDown = false;
-				}
-				container.onmousemove=function(event){
-					event.preventDefault();
-					if(bMouseDown)
-					{
-						camera.rotation.y += -0.005*(event.clientX-x);
-						camera.rotation.x += -0.005*(event.clientY-y);
-						
-						x=event.clientX;
-						y=event.clientY;
-					}
-				}
-				container.onmousewheel=function(event){
-					event.preventDefault();
-					if(event.wheelDelta!=0){
-						camera.fov+=event.wheelDelta>0?1:-1;
-						if(camera.fov>150)
-						{
-						  camera.fov=150;
-						}
-						else if(camera.fov < 30)
-						{
-							camera.fov = 30;
-						}
-						camera.updateProjectionMatrix();
-					}
-				}
-				document.onkeydown=function(e){
-					var e = e || window.event;  //标准化事件处理
-					console.log(e.keyCode);
-					switch(e.keyCode){
-						case 37://左
-							camera.position.x--;
-							break;
-						case 38://上
-							camera.position.y++;
-							break;
-						case 39://右
-							camera.position.x++;
-							break;
-						case 4://下
-							camera.position.y--;
-							break;
-						case 83://s
-							camera.position.z++;
-							break;
-						case 87://w
-							camera.position.z--;
-							break;
-					}
-					//var worldPosition = new THREE.Vector3();
-					//cube.getWorldPosition(worldPosition)
-					//console.log('原始顶点坐标',cube.geometry.vertices);
-				}
-			}
-    </script>
- 
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>show</title>
+        <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+        <script src="tween.umd.js"></script>
+        <script src="three.min.js"></script>
+        <script src="ThreeBSP.js"></script>
+        <script src="OrbitControls.js"></script>
+        <script src="data.js"></script>
+        <script src="yj_common.js"></script>
+        <script src="yj_player.js"></script>
+    </head>
+    <body>
+        <div id="container"></div>
+        <button style="position:absolute;right:10px;bottom:10px;" onclick="toggleModel()">模型</button>
+        <script>
+            var ofloor;
+            var inRoom = true, curRoom = "";
+            var house = new Array();
+            var container = document.getElementById('container');
+            var yjCommon = new yj_common();
+            var yjPlayer = new yj_player({container: container});
+            var pano = yjCommon.getQueryVariable('pano');
+            curRoom = 'pano1';
+            initEvent();
+            yjPlayer.initScene();
+            yjPlayer.initControls();
+            drawHouse();
+            animate();
+            function drawHouse() {
+                var pa = null;
+                if (pano == 'all') {
+                    pa = panos;
+                    $.each(pa, function (pano, data) {
+                        drawRome(pano, data);
+                    })
+                } else {
+                    drawRome(pano, panos[pano]);
+                }
+            }
+            function drawRome(pano, data) {
+                var offset = data.offset;
+                var group = new THREE.Group();
+                group.name = pano;
+                addAroudFaces(group, pano, data);
+                addFloor(group, pano, data);
+                group.position.x = offset[0];
+                group.position.z = offset[2];
+                group.rotation.y = data.rata;
+                yjPlayer.scene.add(group);
+                house[pano] = group;
+//            addTop();
+            }
+            function addAroudFaces(group, pano, data) {
+                var points = data.points;
+                var jiaos = data.jiaos;
+                var offset = data.offset;
+                for (var i = 0; i < points.length; i++) {
+                    let next = (i + 1 == points.length ? 0 : i + 1);
+                    let center = yjCommon.getCenter(points[i], points[next]);
+                    let width = yjCommon.disXYZ(points[i], points[next]);
+                    let height = yjCommon.disXYZ(points[i], [points[i][0], -points[i][1], points[i][2]]);
+                    //addPlane(center,width, height,jiaos[i]);
+                    var face = yjPlayer.addImgFace("../" + pano + '/' + pano + '_' + i + ".png", center, width, height, jiaos[i]);
+                    face.name = pano + '_face_' + i;
+                    face.group_name = pano;
+                    group.add(face);
+                }
+            }
+            function addTop(group, pano, data) {
+            }
+
+            function addFloor(group, pano, data) {
+                var points = data.points;
+                var floor_wh = data.floors.wh;
+//                var center = yjCommon.getPointsCenter(points, offset);
+//                var ofloor = yjPlayer.addFloorFace("../" + pano + '/' + pano + "_floor.png", center, floor_wh[0], floor_wh[1], data.floors.rz);
+//                ofloor.name = pano + '_floor';
+//                ofloor.group_name = pano;
+//                group.add(ofloor);
+//                return;
+                var shaPoint = [];
+                for (var i = 0; i < points.length; i++) {
+                    shaPoint.push(new THREE.Vector2(points[i][0], points[i][2]));//保证顺序，依次push
+                }
+                var shape = new THREE.Shape(shaPoint);
+                var geometry = new THREE.ShapeGeometry(shape);
+
+                var texture = new THREE.TextureLoader().load("../" + pano + '/' + pano + "_floor.png");
+//                texture.wrapT = THREE.RepeatWrapping;
+//                texture.repeat.y = -1;
+//                texture.repeat.set(0.1, 0.1);
+//                texture.offset = new THREE.Vector2(1, 1);
+//                texture.rotation = Math.PI;
+                var material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide});//side: THREE.DoubleSide 两面可见
+                assignUVs(geometry, data);
+
+                var floor = new THREE.Mesh(geometry, material);
+                floor.position.set(0, -4, 0);
+                floor.rotation.x = Math.PI / 2;
+                floor.name = pano + '_floor';
+                floor.group_name = pano;
+                group.add(floor);
+//                yjPlayer.addPolygon(points, offset);
+            }
+            function assignUVs(geometry, data) {
+                var tx_w = data.floors.wh[0];
+                var tx_h = data.floors.wh[1];
+                var tx_pts = data.floors.points;
+                var pM = [tx_pts[0][0], tx_pts[0][2]];
+                var pL = [tx_pts[1][0], tx_pts[1][2]];
+                var pQ = [tx_pts[2][0], tx_pts[2][2]];
+                var len_ML = yjCommon.disXY(pM, pL);
+                var len_LQ = yjCommon.disXY(pL, pQ);
+                var faces = geometry.faces;
+//                console.log(pM, pL, pQ, len_ML, len_LQ, tx_w, tx_h, geometry.vertices);
+                console.log(geometry.vertices)
+                geometry.faceVertexUvs[0] = [];
+                for (var i = 0; i < faces.length; i++) {
+                    var v1 = geometry.vertices[faces[i].a], v2 = geometry.vertices[faces[i].b], v3 = geometry.vertices[faces[i].c];
+                    var pV1 = getNewXY(pM, pL, pQ, v1, len_ML, len_LQ, tx_w, tx_h);
+                    var pV2 = getNewXY(pM, pL, pQ, v2, len_ML, len_LQ, tx_w, tx_h);
+                    var pV3 = getNewXY(pM, pL, pQ, v3, len_ML, len_LQ, tx_w, tx_h);
+//                    console.log(pV1, pV2, pV3);
+                    geometry.faceVertexUvs[0].push([pV1, pV2, pV3]);
+                }
+                geometry.uvsNeedUpdate = true;
+            }
+            function getNewXY(pM, pL, pQ, pH, len_ML, len_LQ, tx_w, tx_h) {
+                var area_HML = yjCommon.areaXY(pM, pL, [pH.x, pH.y]);
+                var len_H_ML = area_HML / len_ML * 2;
+                var area_HLQ = yjCommon.areaXY(pL, pQ, [pH.x, pH.y]);
+                var len_H_LQ = area_HLQ / len_LQ * 2;
+                return new THREE.Vector2(1 - len_H_LQ / tx_w, 1 - len_H_ML / tx_h);
+            }
+
+            function initEvent() {
+                window.addEventListener('resize', yjPlayer.onWindowResize, false);
+                document.addEventListener('click', onClick, false);
+            }
+            function onClick(event) {
+                var selectLine = yjPlayer.getClickObj(event.clientX, event.clientY);
+                for (var i = 0; i < selectLine.length; i++) {
+                    let obj = selectLine[i][0].object;
+                    if (!inRoom) {
+                    } else if (obj.group_name != curRoom) {
+                        inRoom = true;
+                        curRoom = obj.group_name;
+                        yjPlayer.animateCamera(panos[obj.group_name].offset);
+                        return;
+                    }
+                }
+            }
+            function animate() {
+                requestAnimationFrame(animate);
+                TWEEN.update();
+                if (yjPlayer.controls) {
+                    yjPlayer.controls.update();
+                }
+                yjPlayer.renderer.render(yjPlayer.scene, yjPlayer.camera);
+            }
+            function toggleModel() {
+                if (!inRoom) {
+                    yjPlayer.camera.position.set(0, 0, 0);
+                    inRoom = true;
+                } else {
+                    yjPlayer.camera.position.set(15, 5, 15);
+                    inRoom = false;
+                }
+            }
+        </script>
+
+    </body>
 </html>
