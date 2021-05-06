@@ -19,9 +19,8 @@
             var ofloor;
             var inRoom = true, curRoom = "";
             var house = new Array();
-            var container = document.getElementById('container');
             var yjCommon = new yj_common();
-            var yjPlayer = new yj_player({container: container});
+            var yjPlayer = new yj_player({container: document.getElementById('container')});
             var pano = yjCommon.getQueryVariable('pano');
             curRoom = 'pano1';
             initEvent();
@@ -46,35 +45,57 @@
                 group.name = pano;
                 addAroudFaces(group, pano, data);
                 addFloor(group, pano, data);
-                group.position.x = offset[0];
-                group.position.z = offset[2];
+                addTop(group, pano, data);
+                group.position.set(offset[0], 0, offset[2])
                 group.rotation.y = data.rata;
                 yjPlayer.scene.add(group);
                 house[pano] = group;
-//            addTop();
             }
             function addAroudFaces(group, pano, data) {
                 var points = data.points;
                 var jiaos = data.jiaos;
-                var offset = data.offset;
+                var doors = data.door;
                 for (var i = 0; i < points.length; i++) {
                     let next = (i + 1 == points.length ? 0 : i + 1);
                     let center = yjCommon.getCenter(points[i], points[next]);
                     let width = yjCommon.disXYZ(points[i], points[next]);
                     let height = yjCommon.disXYZ(points[i], [points[i][0], -points[i][1], points[i][2]]);
                     //addPlane(center,width, height,jiaos[i]);
-                    var face = yjPlayer.addImgFace("../" + pano + '/' + pano + '_' + i + ".png", center, width, height, jiaos[i]);
+                    var door = false;
+                    if (doors && doors['f' + i]) {
+                        door = doors['f' + i];
+                    }
+                    var face = yjPlayer.addImgFace("../" + pano + '/' + pano + '_' + i + ".png", center, width, height, jiaos[i], door);
                     face.name = pano + '_face_' + i;
                     face.group_name = pano;
                     group.add(face);
                 }
             }
             function addTop(group, pano, data) {
+                var points = data.points;
+                var shaPoint = [];
+                for (var i = 0; i < points.length; i++) {
+                    shaPoint.push(new THREE.Vector2(points[i][0], points[i][2]));//保证顺序，依次push
+                }
+                var shape = new THREE.Shape(shaPoint);
+                var geometry = new THREE.ShapeGeometry(shape);
+
+                var texture = new THREE.TextureLoader().load("../" + pano + '/' + pano + "_top.png");
+                var material = new THREE.MeshBasicMaterial({map: texture, });//side: THREE.DoubleSide 两面可见
+                var tx_pts = data.top.points;
+                yjPlayer.assignFloorUVs(geometry, tx_pts);
+
+                var floor = new THREE.Mesh(geometry, material);
+                floor.position.set(0, 4, 0);
+                floor.rotation.x = Math.PI / 2;
+                floor.name = pano + '_floor';
+                floor.group_name = pano;
+                group.add(floor);
             }
 
             function addFloor(group, pano, data) {
                 var points = data.points;
-                var floor_wh = data.floors.wh;
+//                var floor_wh = data.floors.wh;
 //                var center = yjCommon.getPointsCenter(points, offset);
 //                var ofloor = yjPlayer.addFloorFace("../" + pano + '/' + pano + "_floor.png", center, floor_wh[0], floor_wh[1], data.floors.rz);
 //                ofloor.name = pano + '_floor';
@@ -89,13 +110,9 @@
                 var geometry = new THREE.ShapeGeometry(shape);
 
                 var texture = new THREE.TextureLoader().load("../" + pano + '/' + pano + "_floor.png");
-//                texture.wrapT = THREE.RepeatWrapping;
-//                texture.repeat.y = -1;
-//                texture.repeat.set(0.1, 0.1);
-//                texture.offset = new THREE.Vector2(1, 1);
-//                texture.rotation = Math.PI;
                 var material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide});//side: THREE.DoubleSide 两面可见
-                assignUVs(geometry, data);
+                var tx_pts = data.floor.points;
+                yjPlayer.assignFloorUVs(geometry, tx_pts);
 
                 var floor = new THREE.Mesh(geometry, material);
                 floor.position.set(0, -4, 0);
@@ -104,36 +121,6 @@
                 floor.group_name = pano;
                 group.add(floor);
 //                yjPlayer.addPolygon(points, offset);
-            }
-            function assignUVs(geometry, data) {
-                var tx_w = data.floors.wh[0];
-                var tx_h = data.floors.wh[1];
-                var tx_pts = data.floors.points;
-                var pM = [tx_pts[0][0], tx_pts[0][2]];
-                var pL = [tx_pts[1][0], tx_pts[1][2]];
-                var pQ = [tx_pts[2][0], tx_pts[2][2]];
-                var len_ML = yjCommon.disXY(pM, pL);
-                var len_LQ = yjCommon.disXY(pL, pQ);
-                var faces = geometry.faces;
-//                console.log(pM, pL, pQ, len_ML, len_LQ, tx_w, tx_h, geometry.vertices);
-                console.log(geometry.vertices)
-                geometry.faceVertexUvs[0] = [];
-                for (var i = 0; i < faces.length; i++) {
-                    var v1 = geometry.vertices[faces[i].a], v2 = geometry.vertices[faces[i].b], v3 = geometry.vertices[faces[i].c];
-                    var pV1 = getNewXY(pM, pL, pQ, v1, len_ML, len_LQ, tx_w, tx_h);
-                    var pV2 = getNewXY(pM, pL, pQ, v2, len_ML, len_LQ, tx_w, tx_h);
-                    var pV3 = getNewXY(pM, pL, pQ, v3, len_ML, len_LQ, tx_w, tx_h);
-//                    console.log(pV1, pV2, pV3);
-                    geometry.faceVertexUvs[0].push([pV1, pV2, pV3]);
-                }
-                geometry.uvsNeedUpdate = true;
-            }
-            function getNewXY(pM, pL, pQ, pH, len_ML, len_LQ, tx_w, tx_h) {
-                var area_HML = yjCommon.areaXY(pM, pL, [pH.x, pH.y]);
-                var len_H_ML = area_HML / len_ML * 2;
-                var area_HLQ = yjCommon.areaXY(pL, pQ, [pH.x, pH.y]);
-                var len_H_LQ = area_HLQ / len_LQ * 2;
-                return new THREE.Vector2(1 - len_H_LQ / tx_w, 1 - len_H_ML / tx_h);
             }
 
             function initEvent() {
