@@ -31,9 +31,9 @@
             initPoints();
             initEvent();
             yjPlayer.initScene();
-            drawLines();
+//            drawLines();
 //            addFloor();
-//            addTop();
+            addTop();
             yjPlayer.addPano("../" + pano + '.jpg');
             animate();
             updCtrlDiv();
@@ -58,20 +58,21 @@
 //                    yjPlayer.addALine(new THREE.Vector3(points[i][0], -points[i][1], points[i][2]), new THREE.Vector3(points[next][0], -points[next][1], points[next][2]), 0x0000FF);
                 }
             }
-//            function addFloor() {
-//                var floors = panos[pano].floors.points;
-//                for (var i = 0; i < floors.length; i++) {
-//                    let next = (i + 1 == floors.length ? 0 : i + 1);
-//                    yjPlayer.addALine(new THREE.Vector3(floors[i][0], floors[i][1], floors[i][2]), new THREE.Vector3(floors[next][0], floors[next][1], floors[next][2]), 0xFF00FF);
-//                }
-//            }
-//            function addTop() {
-//                var floors = panos[pano].floors.points;
-//                for (var i = 0; i < floors.length; i++) {
-//                    let next = (i + 1 == floors.length ? 0 : i + 1);
-//                    yjPlayer.addALine(new THREE.Vector3(floors[i][0], -floors[i][1], floors[i][2]), new THREE.Vector3(floors[next][0], -floors[next][1], floors[next][2]), 0xFF00FF);
-//                }
-//            }
+            function addFloor() {
+                var floors = panos[pano].floors.points;
+                for (var i = 0; i < floors.length; i++) {
+                    let next = (i + 1 == floors.length ? 0 : i + 1);
+                    yjPlayer.addALine(new THREE.Vector3(floors[i][0], floors[i][1], floors[i][2]), new THREE.Vector3(floors[next][0], floors[next][1], floors[next][2]), 0xFF00FF);
+                }
+            }
+            function addTop() {
+                var floors = panos[pano].floors.points;
+                for (var i = 0; i < floors.length; i++) {
+                    let next = (i + 1 == floors.length ? 0 : i + 1);
+                    yjPlayer.addALine(new THREE.Vector3(floors[i][0], -floors[i][1], floors[i][2]), new THREE.Vector3(floors[next][0], -floors[next][1], floors[next][2]), 0xFF00FF);
+                    yjPlayer.drawText("(" + floors[i][0] + "," + floors[i][1] + "," + floors[i][2] + ")", floors[i][0], -floors[i][1], floors[i][2])
+                }
+            }
             function changePano(pano) {
                 yjPlayer.changePano(pano);
             }

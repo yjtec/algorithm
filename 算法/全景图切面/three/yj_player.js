@@ -16,10 +16,11 @@ class yj_player {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         // 参数是1表示颜色值，参数2表示透明度值
         this.renderer.setClearColor(0x3a548c, 1); //设置背景颜色
+        this.renderer.localClippingEnabled = true;//对象可以被剪切
         this.container.appendChild(this.renderer.domElement);
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 10000);
-        this.camera.position.set(0, 0, 0);
+        this.camera.position.set(0, 0, 0.01);
         this.raycaster = new THREE.Raycaster();
 //        this.helper()
     }
@@ -101,9 +102,18 @@ class yj_player {
      * @param {type} jiao
      * @returns {yj_player.addAroudFace.face|THREE.Mesh}
      */
-    addImgFace(img, center, width, height, jiao) {
+    addImgFace(img, center, width, height, jiao, door = false) {
         var texture = new THREE.TextureLoader().load(img);
         var material = new THREE.MeshBasicMaterial({map: texture, transparent: true}); //side: THREE.DoubleSide 两面可见
+//        if (door) {
+//            var plane = new THREE.Plane();
+//            var p1 = new THREE.Vector3(door[0][0], door[0][1], door[0][2]);
+//            var p2 = new THREE.Vector3(door[1][0], door[1][1], door[1][2]);
+//            var p3 = new THREE.Vector3(door[2][0], door[2][1], door[2][2]);
+//            plane.setFromCoplanarPoints(p1, p2, p3);// 通过三个点定义一个平面
+//            material.clipIntersection = true;
+//            material.clippingPlanes = plane;
+//        }
         var quad = new THREE.PlaneBufferGeometry(width, height);
         var face = new THREE.Mesh(quad, material);
         face.position.set(center[0], center[1], center[2]);
@@ -132,6 +142,32 @@ class yj_player {
         floor.rotation.z = -jiao;
 //        this.scene.add(floor);
         return floor;
+    }
+
+    assignFloorUVs(geometry, tx_pts) {
+        var pM = [tx_pts[0][0], tx_pts[0][2]];
+        var pL = [tx_pts[1][0], tx_pts[1][2]];
+        var pQ = [tx_pts[2][0], tx_pts[2][2]];
+        var len_ML = yjCommon.disXY(pM, pL);
+        var len_LQ = yjCommon.disXY(pL, pQ);
+        var faces = geometry.faces;
+        geometry.faceVertexUvs[0] = [];
+        for (var i = 0; i < faces.length; i++) {
+            var v1 = geometry.vertices[faces[i].a], v2 = geometry.vertices[faces[i].b], v3 = geometry.vertices[faces[i].c];
+            var pV1 = this.getNewXY(pM, pL, pQ, v1, len_ML, len_LQ);
+            var pV2 = this.getNewXY(pM, pL, pQ, v2, len_ML, len_LQ);
+            var pV3 = this.getNewXY(pM, pL, pQ, v3, len_ML, len_LQ);
+//                    console.log(pV1, pV2, pV3);
+            geometry.faceVertexUvs[0].push([pV1, pV2, pV3]);
+        }
+        geometry.uvsNeedUpdate = true;
+    }
+    getNewXY(pM, pL, pQ, pH, len_ML, len_LQ) {
+        var area_HML = yjCommon.areaXY(pM, pL, [pH.x, pH.y]);
+        var len_H_ML = area_HML / len_ML * 2;
+        var area_HLQ = yjCommon.areaXY(pL, pQ, [pH.x, pH.y]);
+        var len_H_LQ = area_HLQ / len_LQ * 2;
+        return new THREE.Vector2(1 - len_H_LQ / len_ML, 1 - len_H_ML / len_LQ);
     }
     /**
      * 画一个矩形面
@@ -296,7 +332,7 @@ class yj_player {
             z1: position[2],
             x2: position[0],
             y2: position[1],
-            z2: position[2]
+            z2: position[2] - 0.001
         }, 2000);
         this.tween.onUpdate(function () {
             yjPlayer.camera.position.set(positionVar.x1, positionVar.y1, positionVar.z1);
@@ -309,6 +345,19 @@ class yj_player {
 
         this.tween.easing(TWEEN.Easing.Cubic.InOut);
         this.tween.start();
+    }
+    drawText(text, x, y, z) {
+        var that = this;
+        this.textloader = new THREE.FontLoader();
+        this.textloader.load('helvetiker_regular.typeface.json', function (resp) {
+            let color = 0x006699;
+            let matLite = new THREE.MeshBasicMaterial({color: color, side: THREE.DoubleSide, transparent: true});
+            let shapes = resp.generateShapes(text, 0.2);
+            let geometry = new THREE.ShapeBufferGeometry(shapes);
+            let texts = new THREE.Mesh(geometry, matLite);
+            texts.position.set(x, y, z);
+            that.scene.add(texts);
+        });
     }
 }
 

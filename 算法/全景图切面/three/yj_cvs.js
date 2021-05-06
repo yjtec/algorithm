@@ -50,7 +50,7 @@ class yj_cvs {
         this.drawText(pano, 300 + offset[0] * 10, 300 + offset[2] * 10);
         for (var i = 0; i < points.length; i++) {
             let next = (i + 1 == points.length ? 0 : i + 1);
-            this.drawText(i, (points[i][0] + offset[0]) * 10 + 300, (points[i][2] + offset[2]) * 10 + 300);//画顶点的索引号
+            this.drawText(i + "(" + points[i][0] + "," + points[i][1] + ")", (points[i][0] + offset[0]) * 10 + 300, (points[i][2] + offset[2]) * 10 + 300);//画顶点的索引号
             this.drawLine(
                     (points[i][0] + offset[0]) * 10 + 300,
                     (points[i][2] + offset[2]) * 10 + 300,
